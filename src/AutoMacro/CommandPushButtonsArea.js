@@ -8,20 +8,28 @@ class CommandPush extends Component {
   render() {
     return (
       <Card
-        cursor='grab'
-        draggable
-        onDragStart={(e) =>
-          this.props.setDragData({
-            type: 'add_command_block',
-            command: Object.assign({}, this.props.data.default, {
-              type: this.props.data.type,
-              uuid: uuid4(),
-            }),
-          })
+        style={{
+          cursor:
+            this.props.editable && this.props.data.enable
+              ? 'grab'
+              : 'not-allowed',
+        }}
+        draggable={this.props.editable && this.props.data.enable}
+        onDragStart={
+          this.props.editable
+            ? (e) =>
+                this.props.setDragData({
+                  type: 'add_command_block',
+                  command: Object.assign({}, this.props.data.default, {
+                    type: this.props.data.type,
+                    uuid: uuid4(),
+                  }),
+                })
+            : undefined
         }
         className={
           'mb-2 p-1 text-center drag-container text-nowrap ' +
-          (this.props.data.enable
+          (this.props.data.enable && this.props.editable
             ? 'border-primary'
             : 'border-secondary text-secondary')
         }
@@ -34,13 +42,14 @@ class CommandPush extends Component {
 class CommandPushArea extends Component {
   render() {
     return (
-      <div className='d-flex flex-column ml-3'>
+      <div className='d-flex flex-column'>
         {Object.entries(CommandPushButtons).map((entry) => (
           <CommandPush
             key={entry[0]}
             name={entry[0]}
             data={entry[1]}
             setDragData={this.props.setDragData}
+            editable={this.props.editable}
           />
         ))}
       </div>

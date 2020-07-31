@@ -95,6 +95,8 @@ export function SelectAbleKey(props) {
       className='form-control'
       defaultValue={props.defaultValue}
       onChange={props.onChange}
+      readOnly={!props.editable}
+      disabled={!props.editable}
     >
       {Object.entries(AbleKeyList).map((entry) => (
         <option key={entry[0]} value={entry[0]}>
@@ -111,6 +113,8 @@ export function SelectAbleMouseButton(props) {
       className='form-control'
       defaultValue={props.defaultValue}
       onChange={props.onChange}
+      readOnly={!props.editable}
+      disabled={!props.editable}
     >
       {Object.entries(AbleButtonList).map((entry) => (
         <option key={entry[0]} value={entry[0]}>

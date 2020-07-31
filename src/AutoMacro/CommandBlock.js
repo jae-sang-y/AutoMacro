@@ -15,6 +15,7 @@ export default class CommandBlock extends Component {
           <label className='text-dark mr-2'>키 다운</label>
           <SelectAbleKey
             defaultValue={this.props.data.key}
+            editable={this.props.editable}
             onChange={(e) =>
               this.props.modCommand(
                 this.props.group_name,
@@ -32,6 +33,7 @@ export default class CommandBlock extends Component {
           <label className='text-dark mr-2'>키 업</label>
           <SelectAbleKey
             defaultValue={this.props.data.key}
+            editable={this.props.editable}
             onChange={(e) =>
               this.props.modCommand(
                 this.props.group_name,
@@ -49,6 +51,7 @@ export default class CommandBlock extends Component {
           <label className='text-dark mr-2'>마우스 클릭</label>
           <SelectAbleMouseButton
             defaultValue={this.props.data.button}
+            editable={this.props.editable}
             onChange={(e) =>
               this.props.modCommand(
                 this.props.group_name,
@@ -72,6 +75,8 @@ export default class CommandBlock extends Component {
             defaultValue={
               this.props.data.second > 0 ? this.props.data.second : null
             }
+            readOnly={!this.props.editable}
+            disabled={!this.props.editable}
             onChange={(e) =>
               this.props.modCommand(
                 this.props.group_name,
@@ -122,9 +127,11 @@ export default class CommandBlock extends Component {
     return (
       <div
         className='border mt-2 form-inline py-2 pr-2 d-flex'
-        droppable='true'
-        onDragOver={this.onDragOver.bind(this)}
-        draggable
+        droppable={this.props.editable.toString()}
+        onDragOver={
+          this.props.editable ? this.onDragOver.bind(this) : undefined
+        }
+        draggable={this.props.editable.toString()}
         onDragStart={(e) =>
           this.props.setDragData({
             type: 'move_command_block',
@@ -138,7 +145,10 @@ export default class CommandBlock extends Component {
           <BsFillCaretRightFill />
         ) : (
           <label className='mx-1 font-weight-bold text-muted'>
-            <BsArrowsMove cursor='grab' />
+            <BsArrowsMove
+              cursor='grab'
+              visibility={this.props.editable ? 'visible' : 'hidden'}
+            />
           </label>
         )}
         {this.Control(this.props.data.type, this.props.data)}
