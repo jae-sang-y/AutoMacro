@@ -1,115 +1,94 @@
-from uuid import uuid4
+import json
+import logging
+import time
 
+import keyboard
 import mouse
-from flask import Flask
+from flask import Flask, request, Response
+from flask_apscheduler import APScheduler
+from flask_socketio import SocketIO, emit
+from requests import get
+from werkzeug.wrappers import BaseResponse
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.WARNING)
 
 
 class AutoMacro(Flask):
-    class State:
-        idle = 0
-        run = 1
-
-    class CommandTypes:
-        add_global_var = 0
-        image_search = 3
-        key_down = 4
-        key_up = 5
-        mouse_click = 6
-        sound_alarm = 8
-        goto_group = 8
-        delay = 10
-
-    class AbleKeyList:
-        a = 'A'
-        b = 'B'
-        c = 'C'
-        d = 'D'
-        e = 'E'
-        f = 'F'
-        g = 'G'
-        h = 'H'
-        i = 'I'
-        j = 'J'
-        k = 'K'
-        l = 'L'
-        m = 'M'
-        n = 'N'
-        o = 'O'
-        p = 'P'
-        q = 'Q'
-        r = 'R'
-        s = 'S'
-        t = 'T'
-        u = 'U'
-        v = 'V'
-        w = 'W'
-        x = 'X'
-        y = 'Y'
-        z = 'Z'
-
-    class AbleButtonList:
-        left = 'Left'
-        middle = 'Middle'
-        right = 'Right'
-
-    CommandPushButtons = {
-        '전역 변수 추가': {
-            'enable': False,
-            'default_value': {'type': CommandTypes.add_global_var, },
-        },
-        '이미지 서치 추가': {
-            'enable': False,
-            'default_value': {'type': CommandTypes.image_search, },
-        },
-        '키다운 추가': {
-            'enable': True,
-            'default_value': {'type': CommandTypes.key_down, 'key': AbleKeyList.a},
-        },
-        '키 업 추가': {
-            'enable': True,
-            'default_value': {'type': CommandTypes.key_up, 'key': AbleKeyList.a},
-        },
-        '마우스 클릭': {
-            'enable': True,
-            'default_value': {'type': CommandTypes.mouse_click, 'button': AbleButtonList.left},
-        },
-        '사운드 알람': {
-            'enable': False,
-            'default_value': {'type': CommandTypes.sound_alarm, },
-        },
-        '그룹 전환': {
-            'enable': False,
-            'default_value': {'type': CommandTypes.goto_group, },
-        },
-        '시간 지연': {
-            'enable': True,
-            'default_value': {'type': CommandTypes.delay, 'second': 1.0},
-        },
-    }
+    class Config(object):
+        SECRET_KEY = 'secret!'
+        SCHEDULER_API_ENABLED = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.config.from_object(self.Config())
 
-        self.state = AutoMacro.State.idle
-        self.groups = {
-            '메인': {
-                'command_blocks': [
-                    {**self.CommandPushButtons['시간 지연']['default_value'], 'uuid': uuid4()}
-                ]
-            },
-            '서브루틴': {
-                'command_blocks': [
-                    {**self.CommandPushButtons['시간 지연']['default_value'], 'uuid': uuid4()}
-                ]
-            },
-        }
+        with open('macro.dat', 'r', encoding='utf-8') as f:
+            self.macro_data = json.loads(f.read())
+        self.set_route()
+        self.io = SocketIO(self)
+        self.set_handler()
+        self.scheduler = APScheduler()
+        self.set_scheduler()
+        self.scheduler.init_app(self)
+        self.scheduler.start()
 
-        @self.route('/get_mouse_pos')
-        def get_mouse_pos():
+        BaseResponse.automatically_set_content_length = False
+
+    def set_route(self):
+        @self.route('/macro_data', methods=['POST', 'GET'])
+        def macro_data():
+            if request.method == 'POST':
+                self.macro_data = json.loads(request.data.decode('utf-8'))
+                with open('macro.dat', 'w', encoding='utf-8') as f:
+                    f.write(json.dumps(self.macro_data))
+                return self.macro_data
+            elif request.method == 'GET':
+                return self.macro_data
+
+        @self.route('/macro/<path:path>', methods=['POST'])
+        def macro(path):
+            data = json.loads(request.data.decode('utf-8'))
+            print(data)
+            if path == 'keydown':
+                keyboard.press(data['key'])
+            elif path == 'keyup':
+                keyboard.release(data['key'])
+            elif path == 'mouse_click':
+                mouse.click(data['button'])
+            elif path == 'mouse_move':
+                mouse.move(data['x'], data['y'], duration=float(data['duration']))
+            elif path == 'delay':
+                time.sleep(float(data['second']))
+            else:
+                raise data
+            return data
+
+        @self.errorhandler(404)
+        def proxy(e):
+            headers = dict(request.headers)
+            if 'Host' in headers and headers['Host'] == 'localhost':
+                headers['Host'] = 'localhost:3000'
+            data = get(f'http://127.0.0.1:3000{request.path}', headers=headers, timeout=1)
+            if 'Content-Type' in data.headers:
+                return Response(data.content, mimetype=data.headers[
+                    'Content-Type'])  # data.raw.read(), data.status_code, data.headers.items()
+            else:
+                return data.content
+
+    def set_handler(self):
+        @self.io.on('connect')
+        def connect():
+            emit('hello', {'data': 'Connected'})
+
+    def set_scheduler(self):
+        @self.scheduler.task('interval', seconds=0.01)
+        def update_mouse_pos():
             pos = mouse.get_position()
-            return {'x': pos[0], 'y': pos[1]}
+            self.io.emit('mouse_pos', {'x': pos[0], 'y': pos[1]})
 
 
 app = AutoMacro(__name__)
+
 if __name__ == '__main__':
-    app.run(port=80, debug=True)
+    app.io.run(app, port=80)

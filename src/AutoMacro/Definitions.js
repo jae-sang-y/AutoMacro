@@ -9,6 +9,7 @@ export const CommandTypes = {
   sound_alarm: 8,
   goto_group: 8,
   delay: 10,
+  mouse_move: 11,
 };
 
 export const AbleKeyList = {
@@ -41,9 +42,9 @@ export const AbleKeyList = {
 };
 
 export const AbleButtonList = {
-  왼쪽: 'left',
-  가운데쪽: 'middle',
-  오른쪽: 'right',
+  left: '왼쪽',
+  middle: '가운데쪽',
+  right: '오른쪽',
 };
 
 export const CommandPushButtons = {
@@ -71,6 +72,11 @@ export const CommandPushButtons = {
     enable: true,
     type: CommandTypes.mouse_click,
     default_value: { button: Object.keys(AbleButtonList)[0] },
+  },
+  '마우스 이동': {
+    enable: true,
+    type: CommandTypes.mouse_move,
+    default_value: { x: 0, y: 0, duration: 0 },
   },
   '사운드 알람': {
     enable: false,

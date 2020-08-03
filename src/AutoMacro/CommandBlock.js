@@ -5,6 +5,7 @@ import {
   CommandTypes,
   SelectAbleKey,
   SelectAbleMouseButton,
+  AbleButtonList,
 } from './Definitions';
 
 export default class CommandBlock extends Component {
@@ -52,13 +53,15 @@ export default class CommandBlock extends Component {
           <SelectAbleMouseButton
             defaultValue={this.props.data.button}
             editable={this.props.editable}
-            onChange={(e) =>
+            onChange={(e) => {
               this.props.modCommand(
                 this.props.group_name,
                 this.props.data.uuid,
-                Object.assign(this.props.data, { button: e.target.value })
-              )
-            }
+                Object.assign(this.props.data, {
+                  button: e.target.value,
+                })
+              );
+            }}
           />
         </div>
       );
@@ -72,16 +75,77 @@ export default class CommandBlock extends Component {
             type='number'
             step='0.001'
             placeholder='(단위: 초)'
-            defaultValue={
-              this.props.data.second > 0 ? this.props.data.second : null
-            }
+            defaultValue={this.props.data.second}
             readOnly={!this.props.editable}
             disabled={!this.props.editable}
+            draggable='false'
             onChange={(e) =>
               this.props.modCommand(
                 this.props.group_name,
                 this.props.data.uuid,
                 Object.assign(this.props.data, { second: e.target.value })
+              )
+            }
+          />
+        </div>
+      );
+    }
+    if (type === CommandTypes.mouse_move) {
+      const input_number_css = { width: '5em' };
+      return (
+        <div className='flex-fill d-flex justify-content-between'>
+          <label className='text-dark mr-2'>마우스 이동</label>
+          <input
+            className='form-control'
+            style={input_number_css}
+            type='number'
+            step='1'
+            placeholder='X'
+            readOnly={!this.props.editable}
+            disabled={!this.props.editable}
+            defaultValue={this.props.data.x}
+            draggable='false'
+            onChange={(e) =>
+              this.props.modCommand(
+                this.props.group_name,
+                this.props.data.uuid,
+                Object.assign(this.props.data, { x: e.target.value })
+              )
+            }
+          />
+          <input
+            className='form-control'
+            style={input_number_css}
+            type='number'
+            step='1'
+            placeholder='Y'
+            readOnly={!this.props.editable}
+            disabled={!this.props.editable}
+            defaultValue={this.props.data.y}
+            draggable='false'
+            onChange={(e) =>
+              this.props.modCommand(
+                this.props.group_name,
+                this.props.data.uuid,
+                Object.assign(this.props.data, { y: e.target.value })
+              )
+            }
+          />
+          <input
+            className='form-control'
+            style={input_number_css}
+            type='number'
+            step='0.001'
+            placeholder='기간'
+            readOnly={!this.props.editable}
+            disabled={!this.props.editable}
+            defaultValue={this.props.data.duration}
+            draggable='false'
+            onChange={(e) =>
+              this.props.modCommand(
+                this.props.group_name,
+                this.props.data.uuid,
+                Object.assign(this.props.data, { duration: e.target.value })
               )
             }
           />
@@ -126,7 +190,10 @@ export default class CommandBlock extends Component {
   render() {
     return (
       <div
-        className='border mt-2 form-inline py-2 pr-2 d-flex'
+        className={
+          'border mt-2 form-inline py-2 pr-2 d-flex' +
+          (this.props.isFocused ? ' border border-primary' : '')
+        }
         droppable={this.props.editable.toString()}
         onDragOver={
           this.props.editable ? this.onDragOver.bind(this) : undefined
@@ -139,16 +206,16 @@ export default class CommandBlock extends Component {
             group_name: this.props.group_name,
           })
         }
-        onDragEnd={(e) => console.log(e)}
       >
         {this.props.isFocused ? (
           <BsFillCaretRightFill />
+        ) : this.props.editable ? (
+          <label className='mx-1 font-weight-bold text-muted'>
+            <BsArrowsMove cursor='grab' />
+          </label>
         ) : (
           <label className='mx-1 font-weight-bold text-muted'>
-            <BsArrowsMove
-              cursor='grab'
-              visibility={this.props.editable ? 'visible' : 'hidden'}
-            />
+            {this.props.index}
           </label>
         )}
         {this.Control(this.props.data.type, this.props.data)}

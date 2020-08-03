@@ -20,7 +20,7 @@ class CommandPush extends Component {
             ? (e) =>
                 this.props.setDragData({
                   type: 'add_command_block',
-                  command: Object.assign({}, this.props.data.default, {
+                  command: Object.assign({}, this.props.data.default_value, {
                     type: this.props.data.type,
                     uuid: uuid4(),
                   }),

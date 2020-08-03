@@ -3,24 +3,28 @@ import {
   CommandGroupArea,
   CommandPushButtonsArea,
   ControlArea,
+  RunCommand,
 } from './AutoMacro';
 import { Card } from 'react-bootstrap';
 import './App.css';
-import { TiThSmall } from 'react-icons/ti';
+import axios from 'axios';
+import socketIOClient from 'socket.io-client';
 
 export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      run: null,
+      run: {},
       drag_data: {},
       editable: true,
+      emergency_stop: false,
       mouse_pos: {
         x: -1,
         y: -1,
       },
       groups: {},
     };
+    this.closing = false;
   }
 
   getDragData = () => this.state.drag_data;
@@ -99,6 +103,7 @@ export default class App extends Component {
       groups: groups,
     });
   };
+
   moveDownGroup = (group_name) => {
     let group = this.state.groups[group_name];
     let groups_entries = Object.entries(this.state.groups);
@@ -131,12 +136,52 @@ export default class App extends Component {
 
   runMacro = () => {
     this.saveMacro();
+
+    this.setState({
+      editable: false,
+      emergency_stop: false,
+    });
+    RunCommand(
+      this.state.groups,
+      () => !this.state.emergency_stop && !this.closing,
+      (dict) => this.setState(dict)
+    );
+  };
+
+  stopMacro = async () => {
+    this.setState({ emergency_stop: true });
+  };
+
+  assert_success = (result, func) => {
+    if (result.status === 200) {
+      func(result.data);
+    } else {
+      console.log(result);
+      alert('네트워크 오류');
+    }
+  };
+
+  easy_axios = (func) => {
+    return (result) => this.assert_success(result, func);
+  };
+
+  loadMacro = () => {
     this.setState({ editable: false });
+    axios.get('/macro_data').then(
+      this.easy_axios((data) => {
+        this.setState({ editable: true, groups: data });
+      })
+    );
   };
-  stopMacro = () => {
-    this.setState({ editable: true });
+
+  saveMacro = () => {
+    this.setState({ editable: false });
+    axios.post('/macro_data', this.state.groups).then(
+      this.easy_axios((data) => {
+        this.setState({ editable: true, groups: data });
+      })
+    );
   };
-  saveMacro = () => {};
 
   filterNonPureFunction(func) {
     if (this.state.editable) return func;
@@ -144,9 +189,16 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    this.newGroup('main');
-    this.newGroup('서브루틴');
     document.addEventListener('dragend', (e) => this.setDragData({}));
+    this.loadMacro();
+    this.io = socketIOClient();
+    this.io.on('mouse_pos', (mouse_pos) => {
+      this.setState({ mouse_pos: mouse_pos });
+    });
+  }
+
+  componentWillUnmount() {
+    this.closing = true;
   }
 
   render() {
@@ -168,12 +220,16 @@ export default class App extends Component {
             getDragData={this.getDragData}
             setDragData={this.filterNonPureFunction(this.setDragData)}
             editable={this.state.editable}
+            focused_group={this.state.run.group}
+            focused_line={this.state.run.line}
           />
           <div className='ml-3'>
             <ControlArea
               runMacro={this.runMacro}
               stopMacro={this.stopMacro}
               saveMacro={this.saveMacro}
+              editable={this.state.editable}
+              mousePosition={this.state.mouse_pos}
             />
             <CommandPushButtonsArea
               setDragData={this.setDragData}

@@ -47,7 +47,10 @@ class Group extends Component {
   render() {
     return (
       <Card
-        className='p-2 mb-2 py-4 d-flex flex-column'
+        className={
+          'p-2 mb-2 py-4 d-flex flex-column' +
+          (this.props.isFocused ? ' border border-primary' : '')
+        }
         border={this.props.focused ? 'primary' : 'secondary'}
         text={this.props.focused ? 'primary' : 'dark'}
         droppable={this.props.editable.toString()}
@@ -124,7 +127,7 @@ class Group extends Component {
             <CommandBlock
               key={command_block.uuid}
               data={command_block}
-              index={index + 1}
+              index={index}
               group_name={this.props.name}
               getGroup={this.props.getGroup}
               setGroup={this.props.setGroup}
@@ -132,6 +135,9 @@ class Group extends Component {
               setDragData={this.props.setDragData}
               modCommand={this.props.modCommand}
               editable={this.props.editable}
+              isFocused={
+                this.props.isFocused && this.props.focused_line === index
+              }
             />
           ))}
         </div>
@@ -164,66 +170,66 @@ class CommandGroupArea extends Component {
             ableToGoUp={index > 0}
             ableToGoDown={index < groups_count - 1}
             editable={this.props.editable}
+            isFocused={this.props.focused_group === entry[0]}
+            focused_line={this.props.focused_line}
           />
         ))}
 
-        {this.props.editable ? (
-          this.props.getDragData().type === 'add_command_block' ||
-          this.props.getDragData().type === 'move_command_block' ? (
-            <Card
-              className='border d-flex align-items-center py-2'
-              droppable={this.props.editable.toString()}
-              onDragOver={
-                this.props.editable
-                  ? (e) => {
-                      let alien_data = this.props.getDragData();
-                      if (alien_data.type === 'move_command_block') {
-                        e.preventDefault();
-                      }
-                      if (alien_data.type === 'add_command_block')
-                        e.preventDefault();
+        {this.props.getDragData().type === 'add_command_block' ||
+        this.props.getDragData().type === 'move_command_block' ? (
+          <Card
+            className='border d-flex align-items-center py-2'
+            droppable={this.props.editable.toString()}
+            onDragOver={
+              this.props.editable
+                ? (e) => {
+                    let alien_data = this.props.getDragData();
+                    if (alien_data.type === 'move_command_block') {
+                      e.preventDefault();
                     }
-                  : undefined
-              }
-              onDrop={
-                this.props.editable
-                  ? (e) => {
-                      let alien_data = this.props.getDragData();
-                      if (alien_data.type === 'move_command_block') {
-                        e.preventDefault();
-                        let alien_group = this.props.getGroup(
-                          alien_data.group_name
-                        );
-                        alien_group.command_blocks = alien_group.command_blocks.filter(
-                          (command_block) =>
-                            command_block.uuid !== alien_data.command.uuid
-                        );
-                        this.props.setGroup(alien_data.group_name, alien_group);
-                        this.props.setDragData({});
-                      } else if (alien_data.type === 'add_command_block') {
-                        e.preventDefault();
-                        this.props.setDragData({});
-                      }
+                    if (alien_data.type === 'add_command_block')
+                      e.preventDefault();
+                  }
+                : undefined
+            }
+            onDrop={
+              this.props.editable
+                ? (e) => {
+                    let alien_data = this.props.getDragData();
+                    if (alien_data.type === 'move_command_block') {
+                      e.preventDefault();
+                      let alien_group = this.props.getGroup(
+                        alien_data.group_name
+                      );
+                      alien_group.command_blocks = alien_group.command_blocks.filter(
+                        (command_block) =>
+                          command_block.uuid !== alien_data.command.uuid
+                      );
+                      this.props.setGroup(alien_data.group_name, alien_group);
+                      this.props.setDragData({});
+                    } else if (alien_data.type === 'add_command_block') {
+                      e.preventDefault();
+                      this.props.setDragData({});
                     }
-                  : undefined
-              }
-            >
-              <AiFillDelete />
-            </Card>
-          ) : (
-            <Card
-              className='border d-flex align-items-center py-2'
-              style={{
-                cursor: this.props.editable ? 'pointer' : 'not-allowed',
-              }}
-              onClick={
-                this.props.editable ? () => this.props.newGroup() : undefined
-              }
-            >
-              <GrAdd />
-            </Card>
-          )
-        ) : undefined}
+                  }
+                : undefined
+            }
+          >
+            <AiFillDelete />
+          </Card>
+        ) : (
+          <Card
+            className='border d-flex align-items-center py-2'
+            style={{
+              cursor: this.props.editable ? 'pointer' : 'not-allowed',
+            }}
+            onClick={
+              this.props.editable ? () => this.props.newGroup() : undefined
+            }
+          >
+            <GrAdd />
+          </Card>
+        )}
       </div>
     );
   }
