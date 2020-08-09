@@ -4,11 +4,17 @@ import time
 
 import keyboard
 import mouse
+import pyautogui
 from flask import Flask, request, Response
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO, emit
 from requests import get
 from werkzeug.wrappers import BaseResponse
+
+screenshot = pyautogui.screenshot()
+
+screenshot.save('my_screenshot.png')
+print(screenshot)
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARNING)

@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import {
   CommandGroupArea,
   CommandPushButtonsArea,
   ControlArea,
   RunCommand,
-} from './AutoMacro';
-import { Card } from 'react-bootstrap';
-import './App.css';
-import axios from 'axios';
-import socketIOClient from 'socket.io-client';
+} from "./AutoMacro";
+import { Card } from "react-bootstrap";
+import "./App.css";
+import axios from "axios";
+import socketIOClient from "socket.io-client";
 
 export default class App extends Component {
   constructor() {
@@ -32,7 +32,7 @@ export default class App extends Component {
 
   newGroup = (new_group_name = undefined) => {
     const newGroupName = () => {
-      let new_group_name = '새 그룹';
+      let new_group_name = "새 그룹";
       if (this.checkGroup(new_group_name)) {
         let k = 1;
         while (true) {
@@ -157,7 +157,7 @@ export default class App extends Component {
       func(result.data);
     } else {
       console.log(result);
-      alert('네트워크 오류');
+      alert("네트워크 오류");
     }
   };
 
@@ -167,7 +167,7 @@ export default class App extends Component {
 
   loadMacro = () => {
     this.setState({ editable: false });
-    axios.get('/macro_data').then(
+    axios.get("/macro_data").then(
       this.easy_axios((data) => {
         this.setState({ editable: true, groups: data });
       })
@@ -176,7 +176,7 @@ export default class App extends Component {
 
   saveMacro = () => {
     this.setState({ editable: false });
-    axios.post('/macro_data', this.state.groups).then(
+    axios.post("/macro_data", this.state.groups).then(
       this.easy_axios((data) => {
         this.setState({ editable: true, groups: data });
       })
@@ -189,10 +189,10 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    document.addEventListener('dragend', (e) => this.setDragData({}));
+    document.addEventListener("dragend", (e) => this.setDragData({}));
     this.loadMacro();
     this.io = socketIOClient();
-    this.io.on('mouse_pos', (mouse_pos) => {
+    this.io.on("mouse_pos", (mouse_pos) => {
       this.setState({ mouse_pos: mouse_pos });
     });
   }
@@ -203,9 +203,27 @@ export default class App extends Component {
 
   render() {
     return (
-      <Card className='d-flex align-items-center rounded p-3 solid'>
-        <h1 className='text-center my-3'>나만의 매크로 만들기</h1>
-        <div className='d-flex mb-3'>
+      <div className='w-100'>
+        <h5
+          className='text-center bg-dark text-light p-1'
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "2.15rem",
+            zIndex: 1030,
+          }}
+        >
+          나만의 매크로 만들기
+        </h5>
+        <div
+          className='d-flex mb-3'
+          style={{
+            "margin-top": "2.15rem",
+            "margin-right": "15rem",
+          }}
+        >
           <CommandGroupArea
             groups={this.state.groups}
             newGroup={this.filterNonPureFunction(this.newGroup)}
@@ -223,21 +241,31 @@ export default class App extends Component {
             focused_group={this.state.run.group}
             focused_line={this.state.run.line}
           />
-          <div className='ml-3'>
-            <ControlArea
-              runMacro={this.runMacro}
-              stopMacro={this.stopMacro}
-              saveMacro={this.saveMacro}
-              editable={this.state.editable}
-              mousePosition={this.state.mouse_pos}
-            />
-            <CommandPushButtonsArea
-              setDragData={this.setDragData}
-              editable={this.state.editable}
-            />
-          </div>
         </div>
-      </Card>
+        <div
+          className='p-3 bg-gray border'
+          style={{
+            position: "fixed",
+            top: "2.15em",
+            right: 0,
+            width: "15rem",
+            height: "calc(100vh - 2.15rem)",
+            zIndex: 1030,
+          }}
+        >
+          <ControlArea
+            runMacro={this.runMacro}
+            stopMacro={this.stopMacro}
+            saveMacro={this.saveMacro}
+            editable={this.state.editable}
+            mousePosition={this.state.mouse_pos}
+          />
+          <CommandPushButtonsArea
+            setDragData={this.setDragData}
+            editable={this.state.editable}
+          />
+        </div>
+      </div>
     );
   }
 }

@@ -1,19 +1,22 @@
-import React from 'react';
-import { Component } from 'react';
-import { BsArrowsMove, BsFillCaretRightFill } from 'react-icons/bs';
+import React from "react";
+import { Component } from "react";
+import { BsArrowsMove, BsFillCaretRightFill } from "react-icons/bs";
 import {
   CommandTypes,
   SelectAbleKey,
   SelectAbleMouseButton,
   AbleButtonList,
-} from './Definitions';
+} from "./Definitions";
 
 export default class CommandBlock extends Component {
+  ControlLabelCSS = { width: "6rem" };
   Control = (type, data) => {
     if (type === CommandTypes.keydown) {
       return (
         <div className='d-flex'>
-          <label className='text-dark mr-2'>키 다운</label>
+          <label className='text-dark mr-2' style={this.ControlLabelCSS}>
+            키 다운
+          </label>
           <SelectAbleKey
             defaultValue={this.props.data.key}
             editable={this.props.editable}
@@ -31,7 +34,9 @@ export default class CommandBlock extends Component {
     if (type === CommandTypes.keyup) {
       return (
         <div className='d-flex'>
-          <label className='text-dark mr-2'>키 업</label>
+          <label className='text-dark mr-2' style={this.ControlLabelCSS}>
+            키 업
+          </label>
           <SelectAbleKey
             defaultValue={this.props.data.key}
             editable={this.props.editable}
@@ -49,7 +54,9 @@ export default class CommandBlock extends Component {
     if (type === CommandTypes.mouse_click) {
       return (
         <div className='d-flex'>
-          <label className='text-dark mr-2'>마우스 클릭</label>
+          <label className='text-dark mr-2' style={this.ControlLabelCSS}>
+            마우스 클릭
+          </label>
           <SelectAbleMouseButton
             defaultValue={this.props.data.button}
             editable={this.props.editable}
@@ -68,10 +75,12 @@ export default class CommandBlock extends Component {
     }
     if (type === CommandTypes.delay) {
       return (
-        <div className='d-flex'>
-          <label className='text-dark mr-2'>시간 지연</label>
+        <div className='d-flex flex-fill'>
+          <label className='text-dark mr-2' style={this.ControlLabelCSS}>
+            시간 지연
+          </label>
           <input
-            className='form-control'
+            className='form-control flex-fill text-right'
             type='number'
             step='0.001'
             placeholder='(단위: 초)'
@@ -91,13 +100,15 @@ export default class CommandBlock extends Component {
       );
     }
     if (type === CommandTypes.mouse_move) {
-      const input_number_css = { width: '5em' };
+      const MouseMoveNumericInputCSS = { width: "10.67rem" };
       return (
-        <div className='flex-fill d-flex justify-content-between'>
-          <label className='text-dark mr-2'>마우스 이동</label>
+        <div className='flex-fill d-flex'>
+          <label className='text-dark mr-2' style={this.ControlLabelCSS}>
+            마우스 이동
+          </label>
           <input
             className='form-control'
-            style={input_number_css}
+            style={MouseMoveNumericInputCSS}
             type='number'
             step='1'
             placeholder='X'
@@ -114,8 +125,8 @@ export default class CommandBlock extends Component {
             }
           />
           <input
-            className='form-control'
-            style={input_number_css}
+            className='form-control ml-2'
+            style={MouseMoveNumericInputCSS}
             type='number'
             step='1'
             placeholder='Y'
@@ -132,8 +143,8 @@ export default class CommandBlock extends Component {
             }
           />
           <input
-            className='form-control'
-            style={input_number_css}
+            className='form-control text-right ml-2'
+            style={MouseMoveNumericInputCSS}
             type='number'
             step='0.001'
             placeholder='기간'
@@ -156,7 +167,7 @@ export default class CommandBlock extends Component {
 
   onDragOver(e) {
     let alien_data = this.props.getDragData();
-    if (alien_data.type === 'move_command_block') {
+    if (alien_data.type === "move_command_block") {
       e.preventDefault();
       if (this.props.data.uuid !== alien_data.command.uuid) {
         let group = this.props.getGroup(this.props.group_name);
@@ -179,7 +190,7 @@ export default class CommandBlock extends Component {
 
         this.props.setGroup(this.props.group_name, group);
         this.props.setDragData({
-          type: 'move_command_block',
+          type: "move_command_block",
           command: alien_data.command,
           group_name: this.props.group_name,
         });
@@ -191,8 +202,8 @@ export default class CommandBlock extends Component {
     return (
       <div
         className={
-          'border mt-2 form-inline py-2 pr-2 d-flex' +
-          (this.props.isFocused ? ' border border-primary' : '')
+          "border mt-2 form-inline py-2 pr-2 d-flex" +
+          (this.props.isFocused ? " border border-primary" : "")
         }
         droppable={this.props.editable.toString()}
         onDragOver={
@@ -201,7 +212,7 @@ export default class CommandBlock extends Component {
         draggable={this.props.editable.toString()}
         onDragStart={(e) =>
           this.props.setDragData({
-            type: 'move_command_block',
+            type: "move_command_block",
             command: this.props.data,
             group_name: this.props.group_name,
           })

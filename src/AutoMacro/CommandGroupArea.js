@@ -149,8 +149,24 @@ class Group extends Component {
 class CommandGroupArea extends Component {
   render() {
     const groups_count = Object.entries(this.props.groups).length;
+    const FixedBottomButtonCSS = {
+      position: 'fixed',
+      'z-index': 1030,
+      'margin-top': '2.15rem',
+      'margin-right': '15rem',
+    };
     return (
-      <div style={{ minWidth: '25em' }}>
+      <div
+        className='bg-light p-3'
+        style={{
+          position: 'fixed',
+          top: '2.15rem',
+          'margin-top': '0',
+          width: 'calc(100vw - 15rem)',
+          height: 'calc(100vh - 4.35rem)',
+          overflowY: 'scroll',
+        }}
+      >
         {Object.entries(this.props.groups).map((entry, index) => (
           <Group
             className='card p-2 mb-2'
@@ -174,11 +190,11 @@ class CommandGroupArea extends Component {
             focused_line={this.props.focused_line}
           />
         ))}
-
         {this.props.getDragData().type === 'add_command_block' ||
         this.props.getDragData().type === 'move_command_block' ? (
           <Card
             className='border d-flex align-items-center py-2'
+            style={FixedBottomButtonCSS}
             droppable={this.props.editable.toString()}
             onDragOver={
               this.props.editable
@@ -219,10 +235,8 @@ class CommandGroupArea extends Component {
           </Card>
         ) : (
           <Card
-            className='border d-flex align-items-center py-2'
-            style={{
-              cursor: this.props.editable ? 'pointer' : 'not-allowed',
-            }}
+            className='border d-flex align-items-center py-2 fixed-bottom'
+            style={FixedBottomButtonCSS}
             onClick={
               this.props.editable ? () => this.props.newGroup() : undefined
             }
