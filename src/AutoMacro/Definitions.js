@@ -2,14 +2,16 @@ import React from 'react';
 
 export const CommandTypes = {
   add_global_var: 0,
-  image_search: 3,
-  keydown: 4,
-  keyup: 5,
-  mouse_click: 6,
-  sound_alarm: 8,
-  goto_group: 8,
-  delay: 10,
-  mouse_move: 11,
+  image_search: 1,
+  keydown: 2,
+  keyup: 3,
+  mouse_click: 4,
+  sound_alarm: 5,
+  goto_group: 6,
+  delay: 7,
+  mouse_move: 8,
+  comment: 9,
+  choice_group: 10,
 };
 
 export const AbleKeyList = {
@@ -53,10 +55,22 @@ export const CommandPushButtons = {
     type: CommandTypes.add_global_var,
     default_value: {},
   },
+  '주석 추가': {
+    enable: true,
+    type: CommandTypes.comment,
+    default_value: { text: '' },
+  },
   '이미지 서치 추가': {
-    enable: false,
+    enable: true,
     type: CommandTypes.image_search,
-    default_value: {},
+    default_value: {
+      sample: 'dummy.bmp',
+      dest_group: 'main',
+      x: 0,
+      y: 0,
+      w: 1,
+      h: 1,
+    },
   },
   '키다운 추가': {
     enable: true,
@@ -79,14 +93,19 @@ export const CommandPushButtons = {
     default_value: { x: 0, y: 0, duration: 0 },
   },
   '사운드 알람': {
-    enable: false,
+    enable: true,
     type: CommandTypes.sound_alarm,
-    default_value: {},
+    default_value: { sound: 'doorbell.mp3' },
   },
   '그룹 전환': {
-    enable: false,
+    enable: true,
     type: CommandTypes.goto_group,
-    default_value: {},
+    default_value: { dest_group: 'main' },
+  },
+  '랜덤 그룹 전환': {
+    enable: true,
+    type: CommandTypes.choice_group,
+    default_value: { dest_groups: ['main'], choice_group: 'main' },
   },
   '시간 지연': {
     enable: true,
@@ -95,38 +114,31 @@ export const CommandPushButtons = {
   },
 };
 
-export function SelectAbleKey(props) {
+export function SelectTemplate(props) {
+  let options = undefined;
+  if (props.list !== undefined) {
+    options = props.list.map((e) => (
+      <option key={e} value={e}>
+        {e}
+      </option>
+    ));
+  }
+  if (props.dict !== undefined) {
+    options = Object.entries(props.dict).map((entry) => (
+      <option key={entry[0]} value={entry[0]}>
+        {entry[1]}
+      </option>
+    ));
+  }
   return (
     <select
-      className='form-control'
+      className={props.className}
       defaultValue={props.defaultValue}
       onChange={props.onChange}
       readOnly={!props.editable}
       disabled={!props.editable}
     >
-      {Object.entries(AbleKeyList).map((entry) => (
-        <option key={entry[0]} value={entry[0]}>
-          {entry[1]}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-export function SelectAbleMouseButton(props) {
-  return (
-    <select
-      className='form-control'
-      defaultValue={props.defaultValue}
-      onChange={props.onChange}
-      readOnly={!props.editable}
-      disabled={!props.editable}
-    >
-      {Object.entries(AbleButtonList).map((entry) => (
-        <option key={entry[0]} value={entry[0]}>
-          {entry[1]}
-        </option>
-      ))}
+      {options}
     </select>
   );
 }

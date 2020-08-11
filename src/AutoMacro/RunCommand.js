@@ -33,6 +33,27 @@ const RunCommand = async (groups, keep_going, setState) => {
     } else if (data.type === CommandTypes.mouse_move) {
       assert_ok(await axios.post('/macro/mouse_move', data));
       ++program_counter.line;
+    } else if (data.type === CommandTypes.goto_group) {
+      program_counter.group = data.dest_group;
+      program_counter.line = 0;
+    } else if (data.type === CommandTypes.choice_group) {
+      let dest_group =
+        data.dest_groups[Math.floor(Math.random() * data.dest_groups.length)];
+      program_counter.group = dest_group;
+      program_counter.line = 0;
+    } else if (data.type === CommandTypes.sound_alarm) {
+      assert_ok(await axios.post('/macro/sound', data));
+      ++program_counter.line;
+    } else if (data.type === CommandTypes.image_search) {
+      const res = assert_ok(await axios.post('/macro/image_compare', data));
+      if (res.result === 'OK') {
+        program_counter.group = data.dest_group;
+        program_counter.line = 0;
+      } else {
+        ++program_counter.line;
+      }
+    } else if (data.type === CommandTypes.comment) {
+      ++program_counter.line;
     } else {
       program_counter.run = false;
       console.log(data);
@@ -63,7 +84,7 @@ const RunCommand = async (groups, keep_going, setState) => {
     );
     setState({ run: program_counter });
   }
-  setState({ editable: true, run: {} });
+  setState({ editable: true, run: {}, emergency_stop: false });
 };
 
 export default RunCommand;

@@ -1,68 +1,26 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# AutoMacro
 
-## Available Scripts
+![alt](sample.png)
 
-In the project directory, you can run:
+## 개발 환경
+* Windows 10
+* Python 3
+* Firefox
 
-### `npm start`
+## 개발 환경 설치 과정
+1. Pycharm, Visual Studio Code, NPM을 설치 한다.
+2. Pycharm 에서 가상환경을 생성후 requirements.txt로 필요한 파이썬 패키지를 설치한다.
+3. 프로젝트 디렉토리에서 `npm -i`를 입력하여 필요한 Node.js 패키지를 설치한다.
+4. Visual Studio Code에서 NPM Script->Start로 개발 프론트 서버를 가동한다.
+5. Pycharm 가상환경에서 `run.py`를 실행하여 백엔드 서버를 가동한다.
+6. `http://localhost` 혹은 `http://127.0.0.1` 에 들어가서 실행한다.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 디렉토리 설명
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+디렉토리|비고
+---|---
+image_compare_log|이미지 서치가 불일치 할 때 비교한 이미지의 차이를 저장한다.
+image_samples|비교할 때 사용할 이미지가 들어있다.
+sound_effects|사운드 알람으로 사용할 사운드가 들어있다.
+src|프론드엔드의 소스코드가 들어있다.
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify

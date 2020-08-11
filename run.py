@@ -1,20 +1,24 @@
 import json
 import logging
 import time
+import datetime
 
 import keyboard
 import mouse
-import pyautogui
+from playsound import playsound
+from PIL import Image, ImageChops
+
+from desktopmagic.screengrab_win32 import saveScreenToBmp, saveRectToBmp, getScreenAsImage
 from flask import Flask, request, Response
 from flask_apscheduler import APScheduler
 from flask_socketio import SocketIO, emit
 from requests import get
 from werkzeug.wrappers import BaseResponse
 
-screenshot = pyautogui.screenshot()
+from os import listdir
 
-screenshot.save('my_screenshot.png')
-print(screenshot)
+SAMPLE_IMAGES_PATH = 'image_samples'
+SOUND_EFFECTS_PATH = 'sound_effects'
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARNING)
@@ -38,8 +42,11 @@ class AutoMacro(Flask):
         self.set_scheduler()
         self.scheduler.init_app(self)
         self.scheduler.start()
-
+        keyboard.on_press_key('F1', self.on_emergency_key_press)
         BaseResponse.automatically_set_content_length = False
+
+    def on_emergency_key_press(self, event):
+        self.io.emit('emergency_stop')
 
     def set_route(self):
         @self.route('/macro_data', methods=['POST', 'GET'])
@@ -66,9 +73,35 @@ class AutoMacro(Flask):
                 mouse.move(data['x'], data['y'], duration=float(data['duration']))
             elif path == 'delay':
                 time.sleep(float(data['second']))
+            elif path == 'sound':
+                playsound(f'{SOUND_EFFECTS_PATH}/{data["sound"]}')
+            elif path == 'image_compare':
+                prev_image = Image.open(f'{SAMPLE_IMAGES_PATH}/{data["sample"]}')
+
+                curr_image = getScreenAsImage(). \
+                    crop((int(data['x']), int(data['y']),
+                          int(data['x']) + int(data['w']),
+                          int(data['y']) + int(data['h'])))
+
+                diff = ImageChops.difference(prev_image, curr_image)
+                if diff.getbbox() is None:
+                    data['result'] = 'OK'
+                else:
+                    data['result'] = 'NO'
+                    diff.save(f'image_compare_log/{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.bmp')
             else:
                 raise data
             return data
+
+        @self.route('/get_sample_list', methods=['GET'])
+        def get_sample_list():
+            self.sample_list = {'data': [file_name for file_name in listdir(SAMPLE_IMAGES_PATH)]}
+            return self.sample_list
+
+        @self.route('/get_sound_list', methods=['GET'])
+        def get_sound_list():
+            self.sound_list = {'data': [file_name for file_name in listdir(SOUND_EFFECTS_PATH)]}
+            return self.sound_list
 
         @self.errorhandler(404)
         def proxy(e):
@@ -78,7 +111,7 @@ class AutoMacro(Flask):
             data = get(f'http://127.0.0.1:3000{request.path}', headers=headers, timeout=1)
             if 'Content-Type' in data.headers:
                 return Response(data.content, mimetype=data.headers[
-                    'Content-Type'])  # data.raw.read(), data.status_code, data.headers.items()
+                    'Content-Type'])
             else:
                 return data.content
 
